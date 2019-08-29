@@ -1,0 +1,198 @@
+<html>
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type">
+    <title>FunnyAPP</title>
+    <script src="jquery-2.0.0.min.js"></script>
+    <script src="chat.js"></script>
+    <script>
+    var user_name="";
+
+    function test() {
+        var strHTML="<a href='http://www.funnyai.com' target=_blank>funnyai</a>";
+        $("#show").html(strHTML);
+    }
+
+    function new_tts(){
+        var str1 = "";//$("#text1").val();
+        call_sys("tts",str1);
+    }
+
+    //短消息监听
+    function init_sms(){
+        call_sys("init_sms","",function(responseData) {
+                $("#show").html("sms = " + responseData);
+                show_notification_sub("sms",responseData);
+            });
+    }
+
+
+    function open_new_win(index){
+        call_sys("new_win","http://www.funnyai.com/funnyai/funnyapp"+index+".php");
+    }
+
+
+    function show_setting() {
+        call_sys("setting","");
+    }
+    function set_socket_io_server(){
+        call_sys("set_socket_io_server","http://robot6.funnyai.com:8000");
+    }
+
+    function save_alert(){
+        var strAlert="0";
+        if ($("#ck_alert").checked) strAlert="1";
+        call_sys("save_alert",strAlert);
+    }
+
+
+    function show_notification_sub(title,content){
+        call_sys("show_notification",{title:title,message:content});
+    }
+
+    function Read_Property(id){
+        call_sys("ini_read","key"+id,function(responseData) {
+                if (responseData!=null && responseData!=undefined){
+                    $("#tx_Key").val(responseData);
+                }else{
+                    $("#tx_Key").val("");
+                }
+            });
+        call_sys("ini_read","sound"+id,function(responseData) {
+                if (responseData!=null && responseData!=undefined){
+                    $("#tx_Sound").val(responseData);
+                }else{
+                    $("#tx_Sound").val("");
+                }
+            });
+
+    }
+
+    function Call_Rebind(){
+        call_sys("rebind","");
+    }
+
+    function wifi_name(){
+        call_sys("wifi_name","");
+    }
+
+
+    function my_web(index){
+        call_sys("ini_read","sys.user_web"+index,function(responseData) {
+                if (responseData!=null && responseData!=undefined){
+                    call_sys("new_win",responseData);
+                }
+            });
+    }
+
+
+
+    //读取用户名
+    function read_name(){
+        call_sys("ini_read","sys.user_name",function(responseData) {
+                user_name=responseData;
+                //$("#user_name").val(responseData);
+            });
+    }
+
+    function Save_Property(){
+
+        var group = $("#SaveGroup").val();
+        var key = $("#tx_Key").val();
+        var sound = $("#tx_Sound").val();
+
+        call_sys("ini_save",{key:"key"+group,value:key});
+        call_sys("ini_save",{key:"sound"+group,value:sound});
+    }
+
+    function bridgeLog(logContent) {
+        $("#show").html(logContent);
+    }
+
+
+    connectWebViewJavascriptBridge(function(bridge) {
+        //启动运行
+        bridge.registerHandler("sys_on_load", function(data, responseCallback) {
+            read_name();
+            Read_Property(1);
+            chat_history();
+            if (responseCallback) {
+                var responseData = "sys_on_load!";
+                responseCallback(responseData);
+            }
+        });
+
+        bridge.registerHandler("callback_chat_event", function(data, responseCallback) {
+            chat_history();
+            if (responseCallback) {
+                var responseData = "callback_chat_event!";
+                responseCallback(responseData);
+            }
+        });
+
+        bridge.registerHandler("callback_sys_event", function(data, responseCallback) {
+            var obj=JSON.parse(data);
+            var friend=obj.message;
+            $("#friend_list").append("<option value='"+friend+"'>"+friend+"</option>");
+
+            if (responseCallback) {
+                var responseData = "callback_sys_event!";
+                responseCallback(responseData);
+            }
+        });
+
+        bridge.registerHandler("callback_connected", function(data, responseCallback) {
+            //alert(data);
+            if (data=="1"){
+                list_friend();
+            }
+            if (responseCallback) {
+                var responseData = "callback_sys_event!";
+                responseCallback(responseData);
+            }
+        });
+    })
+</script>
+</head>
+<body>
+    <p>
+        系统：
+        <button onclick="open_new_win(1)">1测试</button>
+        <button onclick="open_new_win(3)">3测试</button>
+        <button onclick="chat_history()">历史聊天记录</button>
+        <br>
+        首页：
+        <button onclick="my_web(1)">页面1</button>
+        <button onclick="my_web(2)">页面2</button>
+        <button onclick="my_web(3)">页面3</button>
+        <button onclick="open_new_win(2)">设置</button>
+    </p>
+    <p>
+        <table>
+        <tr><td colspan=2 valign=top>
+
+            <button  style="width:150px;"
+                     onclick="list_friend()">好友列表</button>
+            <select size="26"
+                    style="width:150px;"
+                    name="friend_list" id="friend_list">
+                <option>*</option>
+            </select><br>
+
+
+            消息：<br>
+            <input type="text" id="tx_msg" name="tx_msg"
+                   style="width:250px;"
+                   size="30" value="hello 你好！" />
+            <button style="width:50px;"
+                    onclick="send_msg()">发送</button>
+
+        </td>
+        </tr>
+        </table>
+    </p>
+    <p>
+        <span id="show"></span>
+    </p>
+</body>
+</html>
+

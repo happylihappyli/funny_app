@@ -1,0 +1,1 @@
+include ':FunnyApp_Main', ':library'
