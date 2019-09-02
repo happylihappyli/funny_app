@@ -265,6 +265,7 @@ public class BackGroundService extends Service {
                     mHandler.postDelayed(reconnectCallback, TimeUnit.SECONDS.toMillis(5));
                 }
 
+                /*
                 for (int i=1;i<=3;i++) {
                     String strURL=BackGroundService.getValue("sys.user_js" + i);
                     if (strURL!=null && strURL.equals("")==false){
@@ -272,6 +273,8 @@ public class BackGroundService extends Service {
                         pDownload_JS.execute(strURL);
                     }
                 }
+                //*/
+
                 //每隔30s循环执行run方法
                 mHandler.postDelayed(this, TimeUnit.SECONDS.toMillis(30));
             }

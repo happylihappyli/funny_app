@@ -28,6 +28,11 @@
             </intent-filter>
         </activity>
 
+        <receiver android:name=".AlarmReceiver" />
+
+        <service
+            android:name=".AlarmService"
+            android:enabled="true" />
         <service
             android:name="com.funnyai.android.ListenerService"
             android:label="ListenerService"
@@ -40,9 +45,6 @@
         <service
             android:name=".BackGroundService">
         </service>
-
-        <service android:name=".JobSchedulerService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
 
     </application>
 

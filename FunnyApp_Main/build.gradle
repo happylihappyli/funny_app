@@ -40,5 +40,6 @@ dependencies {
     implementation 'com.faendir.rhino:rhino-android:1.5.2'
 
     implementation 'com.tuenti.smsradar:library:1.0.4'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
 }

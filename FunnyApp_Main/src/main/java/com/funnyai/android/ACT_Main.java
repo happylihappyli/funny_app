@@ -2,6 +2,7 @@ package com.funnyai.android;
 
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.ComponentName;
@@ -64,7 +65,8 @@ import static androidx.core.content.ContextCompat.getSystemService;
 public class ACT_Main extends Activity {
 
     private static final int Ringtone = 0;
-
+    private static ACT_Main inst=null;
+    ///////////////
     public Handler myHandler;
     private BackGroundService mService1;
     private ListenerService mService2;
@@ -72,8 +74,8 @@ public class ACT_Main extends Activity {
 
 	private final String TAG = "ACT_Main";
 
-	BridgeWebView webView;
-
+    private BridgeWebView webView;
+    private PendingIntent pendingIntent;
 
 	int RESULT_CODE = 0;
 
@@ -116,6 +118,9 @@ public class ACT_Main extends Activity {
         }
     };
 
+    public static ACT_Main instance() {
+        return inst;
+    }
 
     public boolean Get_WIFI_Connected(){
         WifiManager wifiMgr = (WifiManager)
@@ -242,6 +247,7 @@ public class ACT_Main extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+        inst=this;
 
         ///////////////////////////////////////
 		setContentView(R.layout.activity_main);
@@ -391,11 +397,28 @@ public class ACT_Main extends Activity {
         });
 
 
-        webView.registerHandler("test1", new BridgeHandler() {
+        webView.registerHandler("set_alarm", new BridgeHandler() {
             @Override
             public void handler(String data, CallBackFunction function) {
-                int iVersion=Tools.Read_Version(ACT_Main.this);
-                function.onCallBack(iVersion+"");
+                String[] strSplit=data.split(":");
+                int hour = Integer.parseInt(strSplit[0]) ;
+                int minute = Integer.parseInt(strSplit[1]);
+//                int iVersion=Tools.Read_Version(ACT_Main.this);
+//                function.onCallBack(iVersion+"");
+
+                    Log.d("MyActivity", "Alarm On");
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.set(Calendar.HOUR_OF_DAY,hour);
+                    calendar.set(Calendar.MINUTE,minute);
+                    Intent myIntent = new Intent(ACT_Main.this, ACT_Main.class);
+                    pendingIntent = PendingIntent.getBroadcast(ACT_Main.this, 0, myIntent, 0);
+                    AlarmManager alarmManager= (AlarmManager) getSystemService(ALARM_SERVICE);
+                    alarmManager.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
+//                } else {
+//                    alarmManager.cancel(pendingIntent);
+//                    setAlarmText("");
+//                    Log.d("MyActivity", "Alarm Off");
+//                }
             }
         });
 

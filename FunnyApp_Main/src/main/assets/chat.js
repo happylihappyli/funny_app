@@ -38,9 +38,9 @@ function list_friend(){
 }
 
 
-function test1_call(){
+function set_alarm(){
 
-    call_sys('test1',"",function(data){
+    call_sys('set_alarm',"18:01",function(data){
         $("#show").html(data);
     });
 }
