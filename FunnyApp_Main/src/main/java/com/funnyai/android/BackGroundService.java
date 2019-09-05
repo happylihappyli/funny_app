@@ -40,6 +40,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Properties;
@@ -182,11 +184,11 @@ public class BackGroundService extends Service {
                                     strMsg);
                         }
 
-                        String strTime=BackGroundService.this.time_now();
+                        String strTime=BackGroundService.time_now();
                         String strSQL="insert into chat_log " +
                                 " (Time,Msg_ID,Event,Type,SFrom,STo,Message)" +
                                 " Values ('"+strTime+"',"+ID+",'chat_event','"+strType+"','"+strFrom+"','"+strTo+"','"+strMsg+"')";
-                        Tools.SQL_Insert(BackGroundService.context,strSQL);
+                        Tools.SQL_Run(BackGroundService.context,strSQL);
 
 
                         Message msg = pMain.myHandler.obtainMessage();
@@ -265,15 +267,21 @@ public class BackGroundService extends Service {
                     mHandler.postDelayed(reconnectCallback, TimeUnit.SECONDS.toMillis(5));
                 }
 
-                /*
-                for (int i=1;i<=3;i++) {
-                    String strURL=BackGroundService.getValue("sys.user_js" + i);
+                Calendar ncalendar = Calendar.getInstance();
+                //小时
+                int hour=ncalendar.get(Calendar.HOUR_OF_DAY);
+                //分
+                int minute=ncalendar.get(Calendar.MINUTE);
+
+                ArrayList<C_Remind> pList=Tools.Remind_Read(BackGroundService.context,hour,minute);
+
+                for (int i=0;i<pList.size();i++) {
+                    String strURL=pList.get(i).URL;
                     if (strURL!=null && strURL.equals("")==false){
                         Download_JS pDownload_JS = new Download_JS(BackGroundService.this);
                         pDownload_JS.execute(strURL);
                     }
                 }
-                //*/
 
                 //每隔30s循环执行run方法
                 mHandler.postDelayed(this, TimeUnit.SECONDS.toMillis(30));

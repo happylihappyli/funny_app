@@ -87,7 +87,7 @@ public class webView_function {
                                 " (Time,Msg_ID,Event,Type,SFrom,STo,Message)" +
                                 " Values ('"+strTime+"',"+msg_id+",'chat_event',''," +
                                 "'"+userName+"','"+strTo+"','"+message+"')";
-                        Tools.SQL_Insert(BackGroundService.context,strSQL);
+                        Tools.SQL_Run(BackGroundService.context,strSQL);
 
                         BackGroundService.socket.emit("chat_event", obj);
                         function.onCallBack("send_msg callback");

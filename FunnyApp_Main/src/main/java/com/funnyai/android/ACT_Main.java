@@ -456,6 +456,28 @@ public class ACT_Main extends Activity {
             }
         });
 
+        webView.registerHandler("sql_run", new BridgeHandler() {
+            @Override
+            public void handler(String data, CallBackFunction function) {
+
+//                String strTime=BackGroundService.time_now();
+//                String strSQL="insert into chat_log " +
+//                        " (Time,Msg_ID,Event,Type,SFrom,STo,Message)" +
+//                        " Values ('"+strTime+"',"+ID+",'chat_event','"+strType+"','"+strFrom+"','"+strTo+"','"+strMsg+"')";
+
+                Tools.SQL_Run(BackGroundService.context,data);
+            }
+        });
+
+
+        webView.registerHandler("remind_read", new BridgeHandler() {
+            @Override
+            public void handler(String data, CallBackFunction function) {
+                String strLine=Tools.Remind_Read(BackGroundService.context);
+                function.onCallBack(strLine);
+            }
+        });
+
 
         webView.registerHandler("setting", new BridgeHandler() {
             @Override

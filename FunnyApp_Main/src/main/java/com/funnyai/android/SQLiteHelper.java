@@ -12,7 +12,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 
     //database values
     private static final String DATABASE_NAME      = "test.db";
-    private static final int DATABASE_VERSION      = 3;
+    private static final int DATABASE_VERSION      = 5;
 
     //db table
     public static final String Table_Name       = "chat_log";
@@ -28,6 +28,15 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 "STo VARCHAR," +
                 "Message VARCHAR) ";
 
+
+    public static final String DATABASE_CREATE_TABLE2=
+            "CREATE TABLE IF NOT EXISTS remind " +
+                    "(ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+                    "Hour Int," +
+                    "Minute Int," +
+                    "URL VARCHAR," +
+                    "Deleted Int) ";
+
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
@@ -39,11 +48,20 @@ public class SQLiteHelper extends SQLiteOpenHelper {
             db.execSQL("DROP TABLE IF EXISTS " + Table_Name);
             onCreate(db);
         }
+        if (oldVersion < 4) {
+            //no modify
+            onCreate(db);
+        }
+        if (oldVersion < 5) {
+            //no modify
+            onCreate(db);
+        }
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
 
         db.execSQL(DATABASE_CREATE_TABLE);
+        db.execSQL(DATABASE_CREATE_TABLE2);
     }
 }
