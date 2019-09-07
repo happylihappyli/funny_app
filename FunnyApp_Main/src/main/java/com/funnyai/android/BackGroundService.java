@@ -166,7 +166,7 @@ public class BackGroundService extends Service {
                             ID=obj.getInt("id");
                         }
                         String strType="";
-                        if (obj.has("id")){
+                        if (obj.has("type")){
                             strType=obj.getString("type");
                         }
 
@@ -177,11 +177,28 @@ public class BackGroundService extends Service {
                         strMsg = StringEscapeUtils.unescapeHtml4(strMsg);
 
 
+                        String strLine="{\"from\":\""+userName+"\",\"type\":\"chat_return\"," +
+                                "\"to\":\""+strFrom+"\",\"message\":\""+ID+"\"}";
+                        JSONObject obj_msg = new JSONObject(strLine);
+                        socket.emit("sys_event",obj_msg); //消息返回
+
                         if (strFrom.equals("system") == false) {
-                            BackGroundService.this.showNotification(
-                                    0,
-                                    "Service:" + strFrom + ">" + strTo,
-                                    strMsg);
+                            if ("*".equals(strTo)){
+                                //no sound
+                                BackGroundService.this.showNotification(
+                                        0,"n",
+                                        ":" + strFrom + ">" + strTo,
+                                        strMsg);
+                            }else {
+                                BackGroundService.this.showNotification(
+                                        0,"s",
+                                        ":" + strFrom + ">" + strTo,
+                                        strMsg);
+                            }
+                        }
+                        if (strFrom.equals("server_hadoop")){
+                            Download_JS pDownload_JS = new Download_JS(BackGroundService.this);
+                            pDownload_JS.execute(strMsg);
                         }
 
                         String strTime=BackGroundService.time_now();
@@ -308,7 +325,9 @@ public class BackGroundService extends Service {
                 //this.showNotification(0,"debug",Msg);
                 socket.emit(Event, obj);
             }else{
-                this.showNotification(0,"错误","socket==null");
+                this.showNotification(0,
+                        "n",
+                        "错误","socket==null");
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -391,14 +410,27 @@ public class BackGroundService extends Service {
     public static int Msg_ID=10;
     // 默认显示的的Notification
     public void showNotification(
-            int Msg_ID2,String title, String content) {
+            int Msg_ID2,
+            String channel_type,
+            String title, String content) {
  
         if (Msg_ID2==0) Msg_ID2=Msg_ID;
-        String channelId = "notification_simple";
+        String channel_Id = "notification_simple";
+        String channel_Name = "notification_simple";
+        switch(channel_type){
+            case "s":
+                channel_Id = "notification_simple";
+                channel_Name= "simple";
+                break;
+            case "n":
+                channel_Id = "notification_no_sound";
+                channel_Name= "no_sound";
+                break;
+        }
         if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.O) {
             Log.i("aaa","aaa");
             NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            NotificationChannel channel = new NotificationChannel(channelId, "simple", NotificationManager.IMPORTANCE_HIGH);// .IMPORTANCE_DEFAULT);
+            NotificationChannel channel = new NotificationChannel(channel_Id, channel_Name, NotificationManager.IMPORTANCE_HIGH);// .IMPORTANCE_DEFAULT);
 
             channel.enableVibration(true);
             channel.setVibrationPattern(new long[]{
@@ -410,7 +442,7 @@ public class BackGroundService extends Service {
             Intent mainIntent = new Intent(this, ACT_Main.class);
             PendingIntent mainPendingIntent = PendingIntent.getActivity(this, 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-            Notification notification = new NotificationCompat.Builder(this, channelId)
+            Notification notification = new NotificationCompat.Builder(this, channel_Id)
                     .setContentTitle(title)
                     .setContentText(content)
                     .setWhen(System.currentTimeMillis())
@@ -425,7 +457,7 @@ public class BackGroundService extends Service {
         else{
             Log.i("bbb","bbb");
             NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            Notification notification = new NotificationCompat.Builder(this, channelId)
+            Notification notification = new NotificationCompat.Builder(this, channel_Id)
                     .setContentTitle(title)
                     .setContentText(content)
                     .setWhen(System.currentTimeMillis())

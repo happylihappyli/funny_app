@@ -254,16 +254,6 @@ public class ACT_Main extends Activity {
 
         webView = (BridgeWebView) findViewById(R.id.webView);
 
-//        EditText pText = (EditText) findViewById(R.id.editText);
-//        Button pButton = (Button) findViewById(R.id.button_go);
-//        pButton.setOnClickListener( new OnClickListener( ) {
-//            @Override
-//            public void onClick(View v) {
-//                //mService1.showNotification(0,"test",pDownload_JS.getStatus().toString());
-//
-//                pDownload_JS.execute(pText.getText().toString());
-//            }
-//        });
 
         //绑定Service1
         Intent bindIntent1 = new Intent(this, BackGroundService.class);
@@ -384,9 +374,10 @@ public class ACT_Main extends Activity {
                     obj = new JSONObject(data);
                     String strTitle=obj.getString("title");
                     String message=obj.getString("message");
+                    //String type=obj.getString("type");
 
                     mService1.showNotification(
-                            0,
+                            0,"s",
                             strTitle,
                             message);
                     function.onCallBack(data);
