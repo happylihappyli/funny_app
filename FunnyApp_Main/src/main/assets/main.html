@@ -8,8 +8,15 @@
     var user_name="";
 
     function test() {
-        var strHTML="<a href='http://www.funnyai.com' target=_blank>funnyai</a>";
-        $("#show").html(strHTML);
+        //var strHTML="<a href='http://www.funnyai.com' target=_blank>funnyai</a>";
+        //$("#show").html(strHTML);
+
+
+        call_sys("show_url_notification","http://www.ckxxbao.com/",function(responseData) {
+                $("#show").html("show_url_notification = " + responseData);
+                //show_notification_sub("sms",responseData);
+            });
+
     }
 
     function new_tts(){
@@ -185,7 +192,7 @@
                    size="30" value="hello 你好！" />
             <button style="width:50px;"
                     onclick="send_msg()">发送</button>
-            <button onclick="set_alarm()">set_alarm</button>
+            <button onclick="test()">test</button>
 
         </td>
         </tr>

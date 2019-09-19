@@ -480,6 +480,23 @@ public class ACT_Main extends Activity {
             }
         });
 
+
+        webView.registerHandler("open_url", new BridgeHandler() {
+            @Override
+            public void handler(String data, CallBackFunction function) {
+                ACT_Main.this.mService1.open_url(data);
+            }
+        });
+        webView.registerHandler("show_url_notification", new BridgeHandler() {
+            @Override
+            public void handler(String data, CallBackFunction function) {
+                ACT_Main.this.mService1.show_url_notification(
+                        0,"s","test",data);
+            }
+        });
+
+
+
         webView.registerHandler("rebind", new BridgeHandler() {
             @Override
             public void handler(String data, CallBackFunction function) {

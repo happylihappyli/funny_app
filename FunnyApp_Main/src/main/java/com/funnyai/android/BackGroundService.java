@@ -128,7 +128,20 @@ public class BackGroundService extends Service {
         }
     }
 
+    public void open_url(String url){
+        Uri uri = Uri.parse(url);//"http://www.baidu.com");
+        Intent intent = new Intent();
+        intent.setAction("android.intent.action.VIEW");
+        intent.setData(uri);
 
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+//        Context context = getApplicationContext();
+//        if (null != intent.resolveActivity(pm)) {
+//            context.startActivity(intent);
+//        }
+        startActivity(intent);
+    }
     /**
      *
      * @param url
@@ -408,6 +421,78 @@ public class BackGroundService extends Service {
     }
     //*
     public static int Msg_ID=10;
+
+    public void show_url_notification(
+            int Msg_ID2,
+            String channel_type,
+            String title, String content) {
+
+        if (Msg_ID2==0) Msg_ID2=Msg_ID;
+        String channel_Id = "notification_simple";
+        String channel_Name = "notification_simple";
+        switch(channel_type){
+            case "s":
+                channel_Id = "notification_simple";
+                channel_Name= "simple";
+                break;
+            case "n":
+                channel_Id = "notification_no_sound";
+                channel_Name= "no_sound";
+                break;
+        }
+        if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.O) {
+            Log.i("aaa","aaa");
+            NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            NotificationChannel channel = new NotificationChannel(channel_Id, channel_Name, NotificationManager.IMPORTANCE_HIGH);// .IMPORTANCE_DEFAULT);
+
+            channel.enableVibration(true);
+            channel.setVibrationPattern(new long[]{
+                    100, 200, 300
+            });
+            manager.createNotificationChannel(channel);
+
+
+            //Intent mainIntent = new Intent(this, ACT_Main.class);
+            Uri uri = Uri.parse(content);//"http://www.baidu.com");
+            Intent mainIntent = new Intent();
+            mainIntent.setAction("android.intent.action.VIEW");
+            mainIntent.setData(uri);
+            //startActivity(mainIntent);
+            PendingIntent mainPendingIntent = PendingIntent.getActivity(this, 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            Notification notification = new NotificationCompat.Builder(this, channel_Id)
+                    .setContentTitle(title)
+                    .setContentText(content)
+                    .setWhen(System.currentTimeMillis())
+                    .setAutoCancel(true)
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setContentIntent(mainPendingIntent)
+                    .build();
+
+
+            manager.notify(Msg_ID2, notification);
+        }
+        else{
+            Log.i("bbb","bbb");
+            NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            Notification notification = new NotificationCompat.Builder(this, channel_Id)
+                    .setContentTitle(title)
+                    .setContentText(content)
+                    .setWhen(System.currentTimeMillis())
+                    .setDefaults(Notification.DEFAULT_SOUND|Notification.DEFAULT_VIBRATE)
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .build();
+            //.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
+            manager.notify(Msg_ID2, notification);
+            Toast.makeText(this,"lest 26",Toast.LENGTH_LONG).show();
+        }
+
+        Log.i("test", "showNotification: "+content);
+
+        Msg_ID+=1;
+    }
+
+
     // 默认显示的的Notification
     public void showNotification(
             int Msg_ID2,
