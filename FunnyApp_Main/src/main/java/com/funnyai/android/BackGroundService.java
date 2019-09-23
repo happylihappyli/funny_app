@@ -129,17 +129,13 @@ public class BackGroundService extends Service {
     }
 
     public void open_url(String url){
-        Uri uri = Uri.parse(url);//"http://www.baidu.com");
+        Uri uri = Uri.parse(url);
         Intent intent = new Intent();
         intent.setAction("android.intent.action.VIEW");
         intent.setData(uri);
 
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-//        Context context = getApplicationContext();
-//        if (null != intent.resolveActivity(pm)) {
-//            context.startActivity(intent);
-//        }
         startActivity(intent);
     }
     /**
