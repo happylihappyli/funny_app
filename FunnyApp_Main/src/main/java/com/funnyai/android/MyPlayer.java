@@ -6,9 +6,7 @@ import java.io.IOException;
 
 /**
  * 自定义播放器
- * 
  * @author happyli
- * 
  */
 public class MyPlayer {
 

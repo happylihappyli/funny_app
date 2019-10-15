@@ -24,20 +24,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.provider.MediaStore;
 import android.provider.Settings;
-import android.speech.tts.TextToSpeech;
 import android.util.Log;
-import android.view.View;
-import android.view.View.OnClickListener;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Toast;
 
-import com.faendir.rhino_android.RhinoAndroidHelper;
 import com.github.lzyzsd.jsbridge.BridgeHandler;
 import com.github.lzyzsd.jsbridge.BridgeWebView;
 import com.github.lzyzsd.jsbridge.BridgeWebViewClient;
@@ -49,18 +41,13 @@ import com.tuenti.smsradar.Sms;
 import com.tuenti.smsradar.SmsListener;
 import com.tuenti.smsradar.SmsRadar;
 
-import org.apache.commons.text.StringEscapeUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
 
 import java.util.Calendar;
-import java.util.Locale;
 
 import io.socket.client.Socket;
 
-import static androidx.core.content.ContextCompat.getSystemService;
 
 public class ACT_Main extends Activity {
 
@@ -207,16 +194,18 @@ public class ACT_Main extends Activity {
     }
 
 
-
-    public void callback_connected(String data){
-        webView.callHandler("callback_connected",
+    public void callback_event(String event,String data){
+        if ("s:keep\\r\\n".equals(data)){
+            return ;
+        }
+        webView.callHandler(event,
                 data, new CallBackFunction() {
                     @Override
                     public void onCallBack(String data) {
-                        //ACT_Main.this.mService1.showNotification(0,"back",data);
                     }
                 });
     }
+
 
 
     public void callback_chat_event(String data){
@@ -224,7 +213,6 @@ public class ACT_Main extends Activity {
             data, new CallBackFunction() {
                 @Override
                 public void onCallBack(String data) {
-                    //ACT_Main.this.mService1.showNotification(0,"back",data);
                 }
             });
     }
@@ -309,6 +297,31 @@ public class ACT_Main extends Activity {
 			}
 		});
 
+
+        myHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                switch(msg.what) {
+                    case 0:
+                        ACT_Main.this.callback_sys_event(msg.obj.toString());
+                        break;
+                    case 1:
+                        ACT_Main.this.callback_chat_event(msg.obj.toString());
+                        break;
+                    case 2:
+                        ACT_Main.this.callback_event(
+                                "callback_connected",msg.obj.toString());
+                        break;
+                    case 10:
+                        ACT_Main.this.callback_event(
+                                "callback_tcp_msg",msg.obj.toString());
+                        break;
+                    default:
+                        break;
+                }
+            }
+        };
+
         Bundle bundle = this.getIntent().getExtras();
         String url = "";
         if (bundle!=null) {
@@ -330,6 +343,17 @@ public class ACT_Main extends Activity {
                 function.onCallBack(data);
             }
         });
+
+
+        webView.registerHandler("tcp_connect", new BridgeHandler() {
+            @Override
+            public void handler(String data, CallBackFunction function) {
+                String[] strSplit=data.split(",");
+                mService1.tcp_connect(strSplit[0],Integer.parseInt(strSplit[1]));
+                function.onCallBack(data);
+            }
+        });
+
 
         webView.registerHandler("init_sms", new BridgeHandler() {
             @Override
@@ -394,22 +418,15 @@ public class ACT_Main extends Activity {
                 String[] strSplit=data.split(":");
                 int hour = Integer.parseInt(strSplit[0]) ;
                 int minute = Integer.parseInt(strSplit[1]);
-//                int iVersion=Tools.Read_Version(ACT_Main.this);
-//                function.onCallBack(iVersion+"");
 
-                    Log.d("MyActivity", "Alarm On");
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.set(Calendar.HOUR_OF_DAY,hour);
-                    calendar.set(Calendar.MINUTE,minute);
-                    Intent myIntent = new Intent(ACT_Main.this, ACT_Main.class);
-                    pendingIntent = PendingIntent.getBroadcast(ACT_Main.this, 0, myIntent, 0);
-                    AlarmManager alarmManager= (AlarmManager) getSystemService(ALARM_SERVICE);
-                    alarmManager.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
-//                } else {
-//                    alarmManager.cancel(pendingIntent);
-//                    setAlarmText("");
-//                    Log.d("MyActivity", "Alarm Off");
-//                }
+                Log.d("MyActivity", "Alarm On");
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(Calendar.HOUR_OF_DAY,hour);
+                calendar.set(Calendar.MINUTE,minute);
+                Intent myIntent = new Intent(ACT_Main.this, ACT_Main.class);
+                pendingIntent = PendingIntent.getBroadcast(ACT_Main.this, 0, myIntent, 0);
+                AlarmManager alarmManager= (AlarmManager) getSystemService(ALARM_SERVICE);
+                alarmManager.set(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
             }
         });
 
@@ -450,12 +467,6 @@ public class ACT_Main extends Activity {
         webView.registerHandler("sql_run", new BridgeHandler() {
             @Override
             public void handler(String data, CallBackFunction function) {
-
-//                String strTime=BackGroundService.time_now();
-//                String strSQL="insert into chat_log " +
-//                        " (Time,Msg_ID,Event,Type,SFrom,STo,Message)" +
-//                        " Values ('"+strTime+"',"+ID+",'chat_event','"+strType+"','"+strFrom+"','"+strTo+"','"+strMsg+"')";
-
                 Tools.SQL_Run(BackGroundService.context,data);
             }
         });
@@ -473,7 +484,6 @@ public class ACT_Main extends Activity {
         webView.registerHandler("setting", new BridgeHandler() {
             @Override
             public void handler(String data, CallBackFunction function) {
-
                 //打开监听引用消息Notification access
                 Intent intent_s = new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS);
                 startActivity(intent_s);
@@ -547,23 +557,6 @@ public class ACT_Main extends Activity {
 
 
 
-        myHandler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                switch(msg.what) {
-                    case 0:
-                        ACT_Main.this.callback_sys_event(msg.obj.toString());
-                        break;
-                    case 1:
-                        ACT_Main.this.callback_chat_event(msg.obj.toString());
-                        break;
-                    case 2:
-                        ACT_Main.this.callback_connected(msg.obj.toString());
-                    default:
-                        break;
-                }
-            }
-        };
     }
 
 

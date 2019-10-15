@@ -2,15 +2,19 @@
 <head>
     <meta content="text/html; charset=utf-8" http-equiv="content-type">
     <title>FunnyAPP</title>
-    <script src="jquery-2.0.0.min.js"></script>
+    <script src="string.js"></script>
     <script src="chat.js"></script>
+    <script src="jquery-2.0.0.min.js"></script>
     <script>
     var user_name="";
 
     function test() {
-        //var strHTML="<a href='http://www.funnyai.com' target=_blank>funnyai</a>";
-        //$("#show").html(strHTML);
 
+        call_sys("show_notification",{title:"test",message:"content"});
+        call_sys("show_url_notification","http://www.ckxxbao.com/",function(responseData) {
+                $("#show").html("show_url_notification = " + responseData);
+                //show_notification_sub("sms",responseData);
+            });
 
         call_sys("show_url_notification","http://www.ckxxbao.com/",function(responseData) {
                 $("#show").html("show_url_notification = " + responseData);
@@ -52,7 +56,7 @@
     }
 
 
-    function show_notification_sub(title,content){
+    function show_msg(title,content){
         call_sys("show_notification",{title:title,message:content});
     }
 
@@ -116,6 +120,44 @@
     }
 
 
+    function process_msg(data){
+        //data=data.replaceAll("\\\\\\\\","\\\\");
+        //data=data.replaceAll("\\n","\n");
+        //data=data.replaceAll("\\n","\n");
+        var index1=data.indexOf(":<s>:");
+        var index2=data.indexOf(":</s>");
+        if (index2>index1 && index1>0){
+            while(index2>index1 && index1>0){
+                var json=data.substring(index1+5,index2);
+                var obj=JSON.parse(json);
+                var msg=obj.message;
+                //s_ui.msg(obj.type);
+                switch(obj.type){
+                    case "chat_return":
+                        //s_ui.text_set("tx_status",msg);
+                        break;
+                    case "list.all":
+                        //s_ui.listbox_add("list_friend",obj.message);
+                    default:
+                        //alert(msg);
+                        call_sys("show_notification",{title:"tcp",message:msg});
+                        msg=msg.replaceAll("\n","\r\n");
+                        log_msg=msg+"\r\n"+log_msg;
+                        //s_ui.text_set("txt1",log_msg);
+                        break;
+                }
+                data=data.substring(index2+6);
+
+                index1=data.indexOf(":<s>:");
+                index2=data.indexOf(":</s>");
+            }
+        }else{
+            log_msg=index1+":"+index2+":";//+data+"\r\n"+log_msg;
+            s_ui.text_set("txt1",log_msg);
+        }
+    }
+
+
     connectWebViewJavascriptBridge(function(bridge) {
         //启动运行
         bridge.registerHandler("sys_on_load", function(data, responseCallback) {
@@ -126,9 +168,13 @@
                 var responseData = "sys_on_load!";
                 responseCallback(responseData);
             }
+            call_sys("tcp_connect","robot6.funnyai.com,6000",function(responseData) {
+                $("#show").html("tcp_connect = " + responseData+"<br><br>\r\n");
+            });
         });
 
         bridge.registerHandler("callback_chat_event", function(data, responseCallback) {
+
             chat_history();
             if (responseCallback) {
                 var responseData = "callback_chat_event!";
@@ -148,7 +194,6 @@
         });
 
         bridge.registerHandler("callback_connected", function(data, responseCallback) {
-            //alert(data);
             if (data=="1"){
                 list_friend();
             }
@@ -157,6 +202,18 @@
                 responseCallback(responseData);
             }
         });
+
+
+        bridge.registerHandler("callback_tcp_msg", function(data, responseCallback) {
+            //alert(data);
+            process_msg(data);
+            $("#show").html("callback_tcp_msg = " + data);
+            if (responseCallback) {
+                var responseData = "callback_tcp_msg!";
+                responseCallback(responseData);
+            }
+        });
+
     })
 </script>
 </head>

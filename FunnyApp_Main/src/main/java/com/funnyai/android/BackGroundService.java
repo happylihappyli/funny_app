@@ -111,7 +111,11 @@ public class BackGroundService extends Service {
         return value;
     }
 
-
+    SocketConnectThread pClient;
+    public void tcp_connect(String IP,int iPort){
+        pClient=new SocketConnectThread(this.pMain,IP,iPort);
+        pClient.start();
+    }
     //修改
     public static String setValue(String key,String value) {
         try {
@@ -138,6 +142,7 @@ public class BackGroundService extends Service {
 
         startActivity(intent);
     }
+
     /**
      *
      * @param url
