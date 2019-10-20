@@ -45,8 +45,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Calendar;
-
-import io.socket.client.Socket;
+//
+//import io.socket.client.Socket;
 
 
 public class ACT_Main extends Activity {
@@ -57,7 +57,7 @@ public class ACT_Main extends Activity {
     public Handler myHandler;
     private BackGroundService mService1;
     private ListenerService mService2;
-    private Socket socket;
+//    private Socket socket;
 
 	private final String TAG = "ACT_Main";
 
@@ -98,10 +98,9 @@ public class ACT_Main extends Activity {
             mService1 = ((BackGroundService.MsgBinder)service).getService();
 
             mService1.pMain=ACT_Main.this;
-            socket = BackGroundService.socket;// mService1.getSocket();
+//            socket = BackGroundService.socket;// mService1.getSocket();
             pDownload_JS=new Download_JS(mService1);
-
-            Log.i("test", "socket: "+socket);
+//            Log.i("test", "socket: "+socket);
         }
     };
 
@@ -153,7 +152,7 @@ public class ACT_Main extends Activity {
             //返回一个MsgService对象
             mService2 = ((ListenerService.MsgBinder)service).getService();
 
-            Log.i("test", "socket: "+socket);
+//            Log.i("test", "socket: "+socket);
         }
     };
 
@@ -312,7 +311,11 @@ public class ACT_Main extends Activity {
                         ACT_Main.this.callback_event(
                                 "callback_connected",msg.obj.toString());
                         break;
-                    case 10:
+                    case 10://zzz
+                        ACT_Main.this.callback_event(
+                                "callback_tcp_msg",msg.obj.toString());
+                        break;
+                    case 11://json
                         ACT_Main.this.callback_event(
                                 "callback_tcp_msg",msg.obj.toString());
                         break;
@@ -335,14 +338,14 @@ public class ACT_Main extends Activity {
 
         webView_function.register(webView);
 
-        webView.registerHandler("set_socket_io_server", new BridgeHandler() {
-            @Override
-            public void handler(String data, CallBackFunction function) {
-                mService1.set_socket_io_server(data);
-                socket = BackGroundService.socket;//mService1.getSocket();
-                function.onCallBack(data);
-            }
-        });
+//        webView.registerHandler("set_socket_io_server", new BridgeHandler() {
+//            @Override
+//            public void handler(String data, CallBackFunction function) {
+//                mService1.set_socket_io_server(data);
+//                socket = BackGroundService.socket;//mService1.getSocket();
+//                function.onCallBack(data);
+//            }
+//        });
 
 
         webView.registerHandler("tcp_connect", new BridgeHandler() {

@@ -80,20 +80,30 @@ public class webView_function {
                     obj = new JSONObject("{id:\""+msg_id+"\",type:\"\"," +
                             "from: \""+userName+"\", to:\""+strTo+"\", " +
                             "message: \""+ StringEscapeUtils.escapeHtml4(message) +"\"}");
-                    if (BackGroundService.socket!=null) {
 
-                        String strTime=BackGroundService.time_now();
-                        String strSQL="insert into chat_log " +
-                                " (Time,Msg_ID,Event,Type,SFrom,STo,Message)" +
-                                " Values ('"+strTime+"',"+msg_id+",'chat_event',''," +
-                                "'"+userName+"','"+strTo+"','"+message+"')";
-                        Tools.SQL_Run(BackGroundService.context,strSQL);
 
-                        BackGroundService.socket.emit("chat_event", obj);
-                        function.onCallBack("send_msg callback");
-                    }else{
-                        function.onCallBack("socket =null ");
-                    }
+                    String strTime=BackGroundService.time_now();
+                    String strSQL="insert into chat_log " +
+                            " (Time,Msg_ID,Event,Type,SFrom,STo,Message)" +
+                            " Values ('"+strTime+"',"+msg_id+",'chat_event',''," +
+                            "'"+userName+"','"+strTo+"','"+message+"')";
+                    Tools.SQL_Run(BackGroundService.context,strSQL);
+
+
+//                    if (BackGroundService.socket!=null) {
+//
+//                        String strTime=BackGroundService.time_now();
+//                        String strSQL="insert into chat_log " +
+//                                " (Time,Msg_ID,Event,Type,SFrom,STo,Message)" +
+//                                " Values ('"+strTime+"',"+msg_id+",'chat_event',''," +
+//                                "'"+userName+"','"+strTo+"','"+message+"')";
+//                        Tools.SQL_Run(BackGroundService.context,strSQL);
+//
+//                        BackGroundService.socket.emit("chat_event", obj);
+//                        function.onCallBack("send_msg callback");
+//                    }else{
+//                        function.onCallBack("socket =null ");
+//                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -110,12 +120,12 @@ public class webView_function {
                 try {
                     data=data.replace("[user]",userName);
                     JSONObject obj = new JSONObject(data);
-                    if (BackGroundService.socket!=null) {
-                        BackGroundService.socket.emit("sys_event", obj);
-                        function.onCallBack("send_msg_sys callback");
-                    }else{
-                        function.onCallBack("socket =null ");
-                    }
+//                    if (BackGroundService.socket!=null) {
+//                        BackGroundService.socket.emit("sys_event", obj);
+//                        function.onCallBack("send_msg_sys callback");
+//                    }else{
+//                        function.onCallBack("socket =null ");
+//                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

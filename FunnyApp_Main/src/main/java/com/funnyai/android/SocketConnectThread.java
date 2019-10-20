@@ -51,6 +51,7 @@ public class SocketConnectThread extends Thread{
     }
 
 
+    public String data_remain="";
     boolean bError=false;
     private void receiveMsg() {
         while(bError==false) {
@@ -67,21 +68,48 @@ public class SocketConnectThread extends Thread{
                 String data= null;
                 try {
                     data = new String(buffer,0,count,"utf-8");
-                    data=data.replaceAll("\\\\","\\\\\\\\");
-                    data=data.replaceAll("\\r","\\\\r");
-                    data=data.replaceAll("\\n","\\\\n");
                 } catch (UnsupportedEncodingException ex) {
                     ex.printStackTrace();
                 }
-                /*
-                if (data.endsWith("\r\n")){
-                    data=data.substring(0,data.length()-2);
+
+                data=data_remain+data;
+                data_remain="";
+                while(data!=null && "".equals(data)==false) {
+                    if (data.startsWith("s:keep")) {
+                        int index=data.indexOf("\n");
+                        if (index>0){
+                            data=data.substring(index+1);
+                        }else{
+                            data_remain=data;
+                            break;
+                        }
+                    }else if(data.startsWith("m:<s>:")){
+                        int index1=data.indexOf(":<s>:");
+                        int index2=data.indexOf(":</s>");
+                        if (index2>index1 && index1>0){
+                            String json=data.substring(index1+5,index2);
+
+                            json=json.replaceAll("\\\\","\\\\\\\\");
+                            json=json.replaceAll("\\r","\\\\r");
+                            json=json.replaceAll("\\n","\\\\n");
+                            Message msg = pMain.myHandler.obtainMessage();
+                            msg.what = 11;//接收到tcp json消息
+                            msg.obj = json;
+                            pMain.myHandler.sendMessage(msg); //发送消息
+
+                            data=data.substring(index2+5);
+                            int index=data.indexOf("\n");
+                            if (index>=0) data=data.substring(index+1);
+                        }else{
+                            data_remain=data;
+                            break;
+                        }
+                    }else{
+                        Log.i(TAG,"error="+data);
+                        data_remain=data;
+                        break;
+                    }
                 }
-                //*/
-                Message msg = pMain.myHandler.obtainMessage();
-                msg.what = 10;//接收到tcp消息
-                msg.obj=data;
-                pMain.myHandler.sendMessage(msg); //发送消息
             }
         }
     }

@@ -48,9 +48,9 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import androidx.core.app.NotificationCompat;
-import io.socket.client.IO;
-import io.socket.client.Socket;
-import io.socket.emitter.Emitter;
+//import io.socket.client.IO;
+//import io.socket.client.Socket;
+//import io.socket.emitter.Emitter;
 
 import static android.content.ContentValues.TAG;
 
@@ -58,11 +58,11 @@ public class BackGroundService extends Service {
 
     ////////静态变量 public
     public static Context context=null;
-    public static Socket socket;
+    //public static Socket socket;
 
     ///////静态变量 private
     private static Properties prop = null;
-    private static String url="http://robot6.funnyai.com:8000";
+    //private static String url="http://robot6.funnyai.com:8000";
 
     private static TextToSpeech tts;
 
@@ -79,17 +79,17 @@ public class BackGroundService extends Service {
     private MsgBinder mMsgBinder=new MsgBinder();
     private Notification notification;
     private Context mContext;
-    private Runnable reconnectCallback=this::start;;
+//    private Runnable reconnectCallback=this::start;;
 
 
-    public synchronized Socket start() {
-
-        Log.i ("socket","WebSocket: starting...");
-        if (socket.connected()==false) {
-            socket.connect();
-        }
-        return socket;
-    }
+//    public synchronized Socket start() {
+//
+//        Log.i ("socket","WebSocket: starting...");
+//        if (socket.connected()==false) {
+//            socket.connect();
+//        }
+//        return socket;
+//    }
 
     public static void read_init(){
 
@@ -146,7 +146,7 @@ public class BackGroundService extends Service {
     /**
      *
      * @param url
-     */
+     *
     public void set_socket_io_server(String url){
         this.url=url;
         try {
@@ -291,12 +291,12 @@ public class BackGroundService extends Service {
             @Override
             public void run() {
                 Log.i("check","check connected");
-                if (socket.connected() == false) {
-                    Log.e("socket","reconnected");
-
-                    mHandler.removeCallbacks(reconnectCallback);
-                    mHandler.postDelayed(reconnectCallback, TimeUnit.SECONDS.toMillis(5));
-                }
+//                if (socket.connected() == false) {
+//                    Log.e("socket","reconnected");
+//
+//                    mHandler.removeCallbacks(reconnectCallback);
+//                    mHandler.postDelayed(reconnectCallback, TimeUnit.SECONDS.toMillis(5));
+//                }
 
                 Calendar ncalendar = Calendar.getInstance();
                 //小时
@@ -320,33 +320,34 @@ public class BackGroundService extends Service {
         };
         r.run();
     }
+    */
 
-    public void Send_Msg(
-            int id,
-            String Event,
-            String Type,
-            String From,
-            String To,
-            String Msg){
-        JSONObject obj = null;
-        try {
-            obj = new JSONObject("{id:\""+id+"\","
-                    +"from:\""+From+"\", "
-                    +"to:\""+To+"\", "
-                    +"type: \""+Type+"\","
-                    +"message: \""+StringEscapeUtils.escapeHtml4(Msg) +"\"}");
-            if (socket!=null) {
-                //this.showNotification(0,"debug",Msg);
-                socket.emit(Event, obj);
-            }else{
-                this.showNotification(0,
-                        "n",
-                        "错误","socket==null");
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
+//    public void Send_Msg(
+//            int id,
+//            String Event,
+//            String Type,
+//            String From,
+//            String To,
+//            String Msg){
+//        JSONObject obj = null;
+//        try {
+//            obj = new JSONObject("{id:\""+id+"\","
+//                    +"from:\""+From+"\", "
+//                    +"to:\""+To+"\", "
+//                    +"type: \""+Type+"\","
+//                    +"message: \""+StringEscapeUtils.escapeHtml4(Msg) +"\"}");
+//            if (socket!=null) {
+//                //this.showNotification(0,"debug",Msg);
+//                socket.emit(Event, obj);
+//            }else{
+//                this.showNotification(0,
+//                        "n",
+//                        "错误","socket==null");
+//            }
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     public static String time_now(){
         SimpleDateFormat sdf = new SimpleDateFormat();// 格式化时间
@@ -393,7 +394,7 @@ public class BackGroundService extends Service {
             startForeground(1, notification);
         }
 
-        set_socket_io_server(this.url);
+        //set_socket_io_server(this.url);
     }
 
     @Override

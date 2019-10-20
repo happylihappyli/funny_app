@@ -120,40 +120,22 @@
     }
 
 
-    function process_msg(data){
-        //data=data.replaceAll("\\\\\\\\","\\\\");
-        //data=data.replaceAll("\\n","\n");
-        //data=data.replaceAll("\\n","\n");
-        var index1=data.indexOf(":<s>:");
-        var index2=data.indexOf(":</s>");
-        if (index2>index1 && index1>0){
-            while(index2>index1 && index1>0){
-                var json=data.substring(index1+5,index2);
-                var obj=JSON.parse(json);
-                var msg=obj.message;
-                //s_ui.msg(obj.type);
-                switch(obj.type){
-                    case "chat_return":
-                        //s_ui.text_set("tx_status",msg);
-                        break;
-                    case "list.all":
-                        //s_ui.listbox_add("list_friend",obj.message);
-                    default:
-                        //alert(msg);
-                        call_sys("show_notification",{title:"tcp",message:msg});
-                        msg=msg.replaceAll("\n","\r\n");
-                        log_msg=msg+"\r\n"+log_msg;
-                        //s_ui.text_set("txt1",log_msg);
-                        break;
-                }
-                data=data.substring(index2+6);
-
-                index1=data.indexOf(":<s>:");
-                index2=data.indexOf(":</s>");
-            }
-        }else{
-            log_msg=index1+":"+index2+":";//+data+"\r\n"+log_msg;
-            s_ui.text_set("txt1",log_msg);
+    function process_msg(json){
+        var obj=JSON.parse(json);
+        var msg=obj.message;
+        switch(obj.type){
+            case "chat_return":
+                //s_ui.text_set("tx_status",msg);
+                break;
+            case "list.all":
+                //s_ui.listbox_add("list_friend",obj.message);
+            default:
+                //alert(msg);
+                call_sys("show_notification",{title:"tcp",message:msg});
+                msg=msg.replaceAll("\n","\r\n");
+                log_msg=msg+"\r\n"+log_msg;
+                //s_ui.text_set("txt1",log_msg);
+                break;
         }
     }
 
