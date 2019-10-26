@@ -75,35 +75,19 @@ public class webView_function {
                     obj = new JSONObject(data);
                     String strTo=obj.getString("to");
                     String message=obj.getString("message");
+                    String type=obj.getString("type");
+                    String return_cmd=obj.getString("return_cmd");
 
-                    msg_id+=1;
-                    obj = new JSONObject("{id:\""+msg_id+"\",type:\"\"," +
-                            "from: \""+userName+"\", to:\""+strTo+"\", " +
-                            "message: \""+ StringEscapeUtils.escapeHtml4(message) +"\"}");
+                    if ("msg".equals(type)){
+                        String strSQL="insert into chat_log " +
+                                " (Time,Msg_ID,Event,Type,SFrom,STo,Message)" +
+                                " Values ('"+BackGroundService.time_now()+"',"+msg_id+",'chat_event',''," +
+                                "'"+userName+"','"+strTo+"','"+message+"')";
+                        Tools.SQL_Run(BackGroundService.context,strSQL);
+                    }
 
-
-                    String strTime=BackGroundService.time_now();
-                    String strSQL="insert into chat_log " +
-                            " (Time,Msg_ID,Event,Type,SFrom,STo,Message)" +
-                            " Values ('"+strTime+"',"+msg_id+",'chat_event',''," +
-                            "'"+userName+"','"+strTo+"','"+message+"')";
-                    Tools.SQL_Run(BackGroundService.context,strSQL);
-
-
-//                    if (BackGroundService.socket!=null) {
-//
-//                        String strTime=BackGroundService.time_now();
-//                        String strSQL="insert into chat_log " +
-//                                " (Time,Msg_ID,Event,Type,SFrom,STo,Message)" +
-//                                " Values ('"+strTime+"',"+msg_id+",'chat_event',''," +
-//                                "'"+userName+"','"+strTo+"','"+message+"')";
-//                        Tools.SQL_Run(BackGroundService.context,strSQL);
-//
-//                        BackGroundService.socket.emit("chat_event", obj);
-//                        function.onCallBack("send_msg callback");
-//                    }else{
-//                        function.onCallBack("socket =null ");
-//                    }
+                    BackGroundService.pClient.send_msg(
+                            type,strTo,message,return_cmd);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -112,24 +96,5 @@ public class webView_function {
 
 
 
-        webView.registerHandler("send_msg_sys", new BridgeHandler() {
-
-            @Override
-            public void handler(String data, CallBackFunction function) {
-                String userName=BackGroundService.getValue("sys.user_name");
-                try {
-                    data=data.replace("[user]",userName);
-                    JSONObject obj = new JSONObject(data);
-//                    if (BackGroundService.socket!=null) {
-//                        BackGroundService.socket.emit("sys_event", obj);
-//                        function.onCallBack("send_msg_sys callback");
-//                    }else{
-//                        function.onCallBack("socket =null ");
-//                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
     }
 }

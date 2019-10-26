@@ -1,8 +1,12 @@
 package com.funnyai.android;
 
+import android.os.Bundle;
+import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,8 +16,17 @@ import java.net.Socket;
 
 import static android.content.ContentValues.TAG;
 
+
 public class SocketConnectThread extends Thread{
 
+    class Connect_Handle extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            event_connected();
+        }
+    }
+
+    public Connect_Handle pConnected=new Connect_Handle();
 
     public Socket mSocket;
     String mIpAddress;
@@ -21,6 +34,8 @@ public class SocketConnectThread extends Thread{
     OutputStream mOutStream;
     InputStream mInStream;
     private ACT_Main pMain=null;
+    public long keep_count=0;
+    public String userName="";
 
     public SocketConnectThread(
             ACT_Main pMain,
@@ -41,6 +56,8 @@ public class SocketConnectThread extends Thread{
                 mOutStream = mSocket.getOutputStream();
                 mInStream = mSocket.getInputStream();
             }
+            Message msg=new Message();
+            pConnected.handleMessage(msg);
             receiveMsg();
         } catch (Exception e) {
             e.printStackTrace();
@@ -51,6 +68,87 @@ public class SocketConnectThread extends Thread{
     }
 
 
+    public void event_connected(){
+        userName=BackGroundService.getValue("sys.user_name");
+        String password=BackGroundService.getValue("sys.user_password");
+        send_msg("login","","","login");
+    }
+
+
+
+
+    Handler handler_send_msg = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            Bundle data = msg.getData();
+            String token = data.getString("token");
+            String type = data.getString("type");
+            String friend = data.getString("friend");
+            String message = data.getString("message");
+            String return_cmd = data.getString("return_cmd");
+
+
+
+            Log.i("mylog","请求结果-->" + token);
+
+
+            String strLine="";
+
+            String strMsg2=message.replace("\"","\\\"");
+            strMsg2=strMsg2.replace("\n","\\n");
+
+            if ("".equals(token)==false){
+                strLine="{\"id\":\""+msg_id+"\","
+                        +"\"token\":\""+token+"\","
+                        +"\"return_cmd\":\""+return_cmd+"\","
+                        +"\"from\":\""+userName+"\",\"type\":\""+type+"\","
+                        +"\"to\":\""+friend+"\",\"message\":\""+strMsg2+"\"}";
+
+                switch(type){
+                    case "login":
+                    case "friend_list":
+                        break;
+                    default:
+                        //myMap["K"+msg_id]=new C_Msg(msg_id,strLine);
+                        break;
+                }
+
+                send_string("m:<s>:"+strLine+":</s>\r\n");
+            }
+        }
+    };
+
+
+    private int msg_id=1;
+    public void send_msg(
+            String type,
+            String friend,
+            String message,
+            String return_cmd) {
+
+        msg_id+=1;
+
+        Runnable runnable = new Runnable(){
+            @Override
+            public void run() {
+                String token=BackGroundService.sys_get_token();
+                Message msg = new Message();
+                Bundle data = new Bundle();
+                data.putString("type",type);
+                data.putString("friend",friend);
+                data.putString("message",message);
+                data.putString("token",token);
+                data.putString("return_cmd",return_cmd);
+                msg.setData(data);
+                handler_send_msg.sendMessage(msg);
+            }
+        };
+        new Thread(runnable).start();
+
+
+    }
+
     public String data_remain="";
     boolean bError=false;
     private void receiveMsg() {
@@ -60,7 +158,7 @@ public class SocketConnectThread extends Thread{
             while (count == 0) {
                 try {
                     count = mInStream.read(buffer, 0, buffer.length);
-                } catch (IOException ex) {
+                } catch (IOException ex){
                     ex.printStackTrace();
                 }
             }
@@ -74,38 +172,31 @@ public class SocketConnectThread extends Thread{
 
                 data=data_remain+data;
                 data_remain="";
-                while(data!=null && "".equals(data)==false) {
-                    if (data.startsWith("s:keep")) {
-                        int index=data.indexOf("\n");
-                        if (index>0){
-                            data=data.substring(index+1);
-                        }else{
-                            data_remain=data;
-                            break;
-                        }
-                    }else if(data.startsWith("m:<s>:")){
-                        int index1=data.indexOf(":<s>:");
-                        int index2=data.indexOf(":</s>");
-                        if (index2>index1 && index1>0){
-                            String json=data.substring(index1+5,index2);
+                while(true){
+                    int index1=data.indexOf(":<s>:");
+                    int index2=data.indexOf(":</s>");
+                    if (index2>index1 && index1>0) {
+                        String json=data.substring(index1+5,index2);
 
-                            json=json.replaceAll("\\\\","\\\\\\\\");
-                            json=json.replaceAll("\\r","\\\\r");
-                            json=json.replaceAll("\\n","\\\\n");
-                            Message msg = pMain.myHandler.obtainMessage();
-                            msg.what = 11;//接收到tcp json消息
-                            msg.obj = json;
-                            pMain.myHandler.sendMessage(msg); //发送消息
+                        json=json.replaceAll("\\\\","\\\\\\\\");
+                        json=json.replaceAll("\\r","\\\\r");
+                        json=json.replaceAll("\\n","\\\\n");
+                        try{
+                            JSONObject pObj=new JSONObject(json);
+                            if (pObj.has("k")){
+                                keep_count=0;
+                            }else {
+                                Message msg = pMain.myHandler.obtainMessage();
+                                msg.what = 11;//接收到tcp json消息
+                                msg.obj = json;
+                                pMain.myHandler.sendMessage(msg); //发送事件
+                            }
+                        }catch(Exception ex){
 
-                            data=data.substring(index2+5);
-                            int index=data.indexOf("\n");
-                            if (index>=0) data=data.substring(index+1);
-                        }else{
-                            data_remain=data;
-                            break;
                         }
+
+                        data=data.substring(index2+5);
                     }else{
-                        Log.i(TAG,"error="+data);
                         data_remain=data;
                         break;
                     }
@@ -115,14 +206,23 @@ public class SocketConnectThread extends Thread{
     }
 
 
-    private void send(String msg){
+    private void send_string(String msg){
         if(msg.length() == 0 || mOutStream == null)
             return;
-        try {   //发送
-            mOutStream.write(msg.getBytes("utf-8"));// getBytes());
-            mOutStream.flush();
-        }catch (Exception e) {
-            e.printStackTrace();
-        }
+
+        Runnable runnable = new Runnable(){
+            @Override
+            public void run() {
+                try {   //发送
+                    mOutStream.write(msg.getBytes("utf-8"));// getBytes());
+                    mOutStream.flush();
+                }catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        new Thread(runnable).start();
+
+
     }
 }

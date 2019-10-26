@@ -30,8 +30,8 @@ function call_sys(strFunction,strData,myFunction){
 
 function list_friend(){
 
-    call_sys('send_msg_sys',
-        {type:"list.all",from: "[user]", to:"", message: ""},
+    call_sys('send_msg',
+        {type:"friend_list",from: "[user]", to:"", message: "",return_cmd:"friend_list"},
         function(){
             $("#friend_list").html("<option value='*' selected>*</option>");
         });

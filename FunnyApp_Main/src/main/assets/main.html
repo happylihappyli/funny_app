@@ -127,8 +127,14 @@
             case "chat_return":
                 //s_ui.text_set("tx_status",msg);
                 break;
+            case "login.ok":
+                list_friend();
+                break;
             case "list.all":
-                //s_ui.listbox_add("list_friend",obj.message);
+                var friend=obj.message;
+                var line="<option value='"+friend+"'>"+friend+"</option>";
+                $("#friend_list").append(line);
+                break;
             default:
                 //alert(msg);
                 call_sys("show_notification",{title:"tcp",message:msg});
