@@ -71,7 +71,7 @@ public class SocketConnectThread extends Thread{
     public void event_connected(){
         userName=BackGroundService.getValue("sys.user_name");
         String password=BackGroundService.getValue("sys.user_password");
-        send_msg("login","","","login");
+        send_msg("","login","","","login");
     }
 
 
@@ -82,6 +82,7 @@ public class SocketConnectThread extends Thread{
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             Bundle data = msg.getData();
+            String oid = data.getString("oid");
             String token = data.getString("token");
             String type = data.getString("type");
             String friend = data.getString("friend");
@@ -100,6 +101,7 @@ public class SocketConnectThread extends Thread{
 
             if ("".equals(token)==false){
                 strLine="{\"id\":\""+msg_id+"\","
+                        +"\"oid\":\""+oid+"\","
                         +"\"token\":\""+token+"\","
                         +"\"return_cmd\":\""+return_cmd+"\","
                         +"\"from\":\""+userName+"\",\"type\":\""+type+"\","
@@ -122,6 +124,7 @@ public class SocketConnectThread extends Thread{
 
     private int msg_id=1;
     public void send_msg(
+            String oid,
             String type,
             String friend,
             String message,
@@ -135,6 +138,7 @@ public class SocketConnectThread extends Thread{
                 String token=BackGroundService.sys_get_token();
                 Message msg = new Message();
                 Bundle data = new Bundle();
+                data.putString("oid",oid);
                 data.putString("type",type);
                 data.putString("friend",friend);
                 data.putString("message",message);
@@ -186,10 +190,36 @@ public class SocketConnectThread extends Thread{
                             if (pObj.has("k")){
                                 keep_count=0;
                             }else {
-                                Message msg = pMain.myHandler.obtainMessage();
-                                msg.what = 11;//接收到tcp json消息
-                                msg.obj = json;
-                                pMain.myHandler.sendMessage(msg); //发送事件
+                                if (pObj.has("type")){
+                                    String type=pObj.getString("type");
+                                    switch(type){
+                                        case "chat_return":
+                                            break;
+                                        case "ai":
+                                        case "msg":
+                                            String id=pObj.getString("id");
+                                            String from=pObj.getString("from");
+                                            String to=pObj.getString("to");
+                                            String message=pObj.getString("message");
+                                            this.send_msg(id,"chat_return",from,"","");
+
+
+                                            String strSQL="insert into chat_log " +
+                                                    " (Time,Msg_ID,Event,Type,SFrom,STo,Message)" +
+                                                    " Values ('"+BackGroundService.time_now()+"',"+id+",'chat_event',''," +
+                                                    "'"+from+"','"+to+"','"+message+"')";
+                                            Tools.SQL_Run(BackGroundService.context,strSQL);
+                                        default:
+
+                                            Message msg = pMain.myHandler.obtainMessage();
+                                            msg.what = 11;//接收到tcp json消息
+                                            msg.obj = json;
+                                            pMain.myHandler.sendMessage(msg); //发送事件
+                                            break;
+                                    }
+                                }else{
+                                    Log.i("mylog",json);
+                                }
                             }
                         }catch(Exception ex){
 

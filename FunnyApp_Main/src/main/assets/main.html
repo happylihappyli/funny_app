@@ -138,9 +138,10 @@
             default:
                 //alert(msg);
                 call_sys("show_notification",{title:"tcp",message:msg});
-                msg=msg.replaceAll("\n","\r\n");
-                log_msg=msg+"\r\n"+log_msg;
+                //msg=msg.replaceAll("\n","\r\n");
+                //log_msg=msg+"\r\n"+log_msg;
                 //s_ui.text_set("txt1",log_msg);
+                chat_history();
                 break;
         }
     }
@@ -195,7 +196,7 @@
         bridge.registerHandler("callback_tcp_msg", function(data, responseCallback) {
             //alert(data);
             process_msg(data);
-            $("#show").html("callback_tcp_msg = " + data);
+            //$("#show").html("callback_tcp_msg = " + data);
             if (responseCallback) {
                 var responseData = "callback_tcp_msg!";
                 responseCallback(responseData);

@@ -71,7 +71,7 @@ function chat_read(ids){
             var strLine;
 
             if (from==user_name){
-                strLine=id+"=我:"+time+"<br>"
+                strLine=id+"=我 &gt; "+to+":"+time+"<br>"
                                             +msg+"<br><br>";
             }else{
                 strLine=id+"="+from+":"+time+"<br><font color=blue>"
@@ -87,7 +87,7 @@ function send_msg() {
     var to=$("#friend_list").val();
 
     call_sys('send_msg',
-        {"to":to,"message":str1},
+        {"to":to,"type":"msg","message":str1},
         function(){
             chat_history();
         });

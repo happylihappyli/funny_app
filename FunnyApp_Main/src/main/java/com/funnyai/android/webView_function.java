@@ -76,7 +76,11 @@ public class webView_function {
                     String strTo=obj.getString("to");
                     String message=obj.getString("message");
                     String type=obj.getString("type");
-                    String return_cmd=obj.getString("return_cmd");
+
+                    String oid="";
+                    if (obj.has("oid")) oid=obj.getString("oid");
+                    String return_cmd="";
+                    if (obj.has("return_cmd")) return_cmd=obj.getString("return_cmd");
 
                     if ("msg".equals(type)){
                         String strSQL="insert into chat_log " +
@@ -87,7 +91,7 @@ public class webView_function {
                     }
 
                     BackGroundService.pClient.send_msg(
-                            type,strTo,message,return_cmd);
+                            oid,type,strTo,message,return_cmd);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
