@@ -28,9 +28,6 @@ import android.widget.Toast;
 
 import com.funnyai.android.R;
 
-import org.apache.commons.text.StringEscapeUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -52,6 +49,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
 import androidx.core.app.NotificationCompat;
@@ -64,14 +62,13 @@ import static java.net.Proxy.Type.HTTP;
 
 public class BackGroundService extends Service {
 
+    public static TreeMap pMap=new TreeMap();
+
     ////////静态变量 public
     public static Context context=null;
-    //public static Socket socket;
 
     ///////静态变量 private
     private static Properties prop = null;
-    //private static String url="http://robot6.funnyai.com:8000";
-
     private static TextToSpeech tts;
 
 
@@ -89,15 +86,6 @@ public class BackGroundService extends Service {
     private Context mContext;
 //    private Runnable reconnectCallback=this::start;;
 
-
-//    public synchronized Socket start() {
-//
-//        Log.i ("socket","WebSocket: starting...");
-//        if (socket.connected()==false) {
-//            socket.connect();
-//        }
-//        return socket;
-//    }
 
     public static void read_init(){
 

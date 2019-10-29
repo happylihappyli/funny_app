@@ -23,6 +23,10 @@
 
     }
 
+    function test2(){
+        var url="http://robot6.funnyai.com/app/ai_weather_shanghai.js";
+        call_sys("js_run",url);
+    }
     function new_tts(){
         var str1 = "";//$("#text1").val();
         call_sys("tts",str1);
@@ -44,9 +48,6 @@
 
     function show_setting() {
         call_sys("setting","");
-    }
-    function set_socket_io_server(){
-        call_sys("set_socket_io_server","http://robot6.funnyai.com:8000");
     }
 
     function save_alert(){
@@ -101,7 +102,6 @@
     function read_name(){
         call_sys("ini_read","sys.user_name",function(responseData) {
                 user_name=responseData;
-                //$("#user_name").val(responseData);
             });
     }
 
@@ -125,7 +125,6 @@
         var msg=obj.message;
         switch(obj.type){
             case "chat_return":
-                //s_ui.text_set("tx_status",msg);
                 break;
             case "login.ok":
                 list_friend();
@@ -136,11 +135,7 @@
                 $("#friend_list").append(line);
                 break;
             default:
-                //alert(msg);
-                call_sys("show_notification",{title:"tcp",message:msg});
-                //msg=msg.replaceAll("\n","\r\n");
-                //log_msg=msg+"\r\n"+log_msg;
-                //s_ui.text_set("txt1",log_msg);
+                call_sys("show_notification",{title:obj.type,message:msg});
                 chat_history();
                 break;
         }
@@ -239,7 +234,7 @@
             <button style="width:50px;"
                     onclick="send_msg()">发送</button>
             <button onclick="test()">test</button>
-
+            <button onclick="test2()">test2</button>
         </td>
         </tr>
         </table>

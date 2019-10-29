@@ -475,6 +475,13 @@ public class ACT_Main extends Activity {
         });
 
 
+        webView.registerHandler("js_run", new BridgeHandler() {
+            @Override
+            public void handler(String data, CallBackFunction function) {
+                Download_JS pDownload_JS = new Download_JS(mService1);
+                pDownload_JS.execute(data);
+            }
+        });
         webView.registerHandler("remind_read", new BridgeHandler() {
             @Override
             public void handler(String data, CallBackFunction function) {
