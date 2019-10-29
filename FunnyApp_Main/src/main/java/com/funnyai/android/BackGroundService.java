@@ -189,7 +189,7 @@ public class BackGroundService extends Service {
 
     public static SocketConnectThread pClient;
     public void tcp_connect(String IP,int iPort){
-        pClient=new SocketConnectThread(this.pMain,IP,iPort);
+        pClient=new SocketConnectThread(this,this.pMain,IP,iPort);
         pClient.start();
     }
     //修改
