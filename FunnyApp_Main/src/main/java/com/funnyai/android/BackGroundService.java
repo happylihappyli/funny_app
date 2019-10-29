@@ -327,7 +327,6 @@ public class BackGroundService extends Service {
             Intent mainIntent = new Intent();
             mainIntent.setAction("android.intent.action.VIEW");
             mainIntent.setData(uri);
-            //startActivity(mainIntent);
             PendingIntent mainPendingIntent = PendingIntent.getActivity(this, 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             Notification notification = new NotificationCompat.Builder(this, channel_Id)
